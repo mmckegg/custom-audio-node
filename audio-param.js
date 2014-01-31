@@ -76,6 +76,9 @@ function fence(value){
 function setValueAtTime(value, startTime){
   var targets = this._targets
   value = this.fence(value)
+
+  this._lastValue = value
+
   for (var i=0,l=targets.length;i<l;i++){
     var target = targets[i]
     target.param.setValueAtTime(target.value(value), startTime)
