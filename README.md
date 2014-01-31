@@ -43,4 +43,6 @@ var customNode = createAudioNode(input, output, {
     ]
   }
 })
+
+customNode.connect(audioContext.destination)
 ```
