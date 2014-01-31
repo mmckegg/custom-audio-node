@@ -13,7 +13,7 @@ module.exports = function(input, output, params){
   return node
 }
 
-module.exports = createAudioParam
+module.exports.createAudioParam = createAudioParam
 
 function connect(destination, channel){
   this._output.connect(destination, channel)
