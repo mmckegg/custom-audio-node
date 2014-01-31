@@ -4,10 +4,18 @@ module.exports = function(input, output, params){
   var audioContext = input.context || output.context
 
   var node = audioContext.createGain()
-  node.connect(input)
+
+  if (input){
+    node.connect(input)
+  }
+
   node._output = output
-  node.connect = connect
-  node.disconnect = disconnect
+
+  if (output){
+    node.connect = connect
+    node.disconnect = disconnect
+  }
+
   addAudioParams(node, params)
 
   return node
