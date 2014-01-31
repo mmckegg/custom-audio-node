@@ -46,3 +46,8 @@ var customNode = createAudioNode(input, output, {
 
 customNode.connect(audioContext.destination)
 ```
+
+## TODO
+
+- param.value should return the curve value at current time not the final value
+- params currently cannot be connected to from another audioNode (modulate) e.g. `node.connect(otherNode.frequency)`
