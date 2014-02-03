@@ -22,13 +22,20 @@ Specify the **input** and **output** nodes to wrap into a single audio node.
 **params**: automatable AudioParams
 
 ```js
+var extendTransform = require('audio-param-transform')
+
 var audioContext = new webkitAudioContext()
 var input = audioContext.createBiquadFilter()
 var output = audioContext.createGain()
 
+// add the transform method
+extendTransform(input.frequency, audioContext)
+
+var decimalFrequencyParam = input.frequency.transform(valueToFreq)
+
 input.connect(output)
 
-function mapValueToFreq(value){
+function mapValueToFreq(defaultValue, value){
   var min = Math.log(100)/Math.log(10)
   var max = Math.log(20000)/Math.log(10)
   var range = max-min
@@ -38,9 +45,7 @@ function mapValueToFreq(value){
 var customNode = createAudioNode(input, output, {
   amount: {
     min: 0, max: 1, defaultValue: 0.5,
-    targets: [
-      { param: filter.frequency, value: mapValueToFreq }
-    ]
+    targets: [ decimalFrequencyParam ]
   }
 })
 

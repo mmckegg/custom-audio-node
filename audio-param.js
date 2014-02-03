@@ -3,6 +3,10 @@ module.exports = function(audioContext, name, options){
 
   var targets = options.targets
 
+  if (!targets && options.target){
+    targets = [options.target]
+  }
+
   var param = Object.create(AudioParam.prototype, {
     value: {
       get: function(){
@@ -13,7 +17,7 @@ module.exports = function(audioContext, name, options){
         param._lastValue = value
         for (var i=0,l=targets.length;i<l;i++){
           var target = targets[i]
-          target.param.value = target.value(value)
+          target.value = value
         }
       }
     },
@@ -80,8 +84,7 @@ function setValueAtTime(value, startTime){
   this._lastValue = value
 
   for (var i=0,l=targets.length;i<l;i++){
-    var target = targets[i]
-    target.param.setValueAtTime(target.value(value), startTime)
+    targets[i].setValueAtTime(value, startTime)
   }
 }
 
@@ -90,79 +93,46 @@ function setTargetAtTime(value, startTime, timeConstant){
   var targets = this._targets
   value = this.fence(value)
   for (var i=0,l=targets.length;i<l;i++){
-    var target = targets[i]
-    target.param.exponentialRampToValueAtTime(target.value(value), startTime, timeConstant)
+    if (targets[i].setTargetAtTime){
+      targets[i].setTargetAtTime(value, startTime, timeConstant)
+    }
   }
 }
 
 function linearRampToValueAtTime(value, endTime){
-  ramp(this, value, endTime, 'linear')
+  var targets = this._targets
+  value = this.fence(value)
+
+  this._lastValue = value
+
+  for (var i=0,l=targets.length;i<l;i++){
+    targets[i].linearRampToValueAtTime(value, endTime)
+  }
 }
 
 function exponentialRampToValueAtTime(value, endTime){
-  ramp(this, value, endTime, 'exp')
+  var targets = this._targets
+  value = this.fence(value)
+
+  this._lastValue = value
+
+  for (var i=0,l=targets.length;i<l;i++){
+    targets[i].exponentialRampToValueAtTime(value, endTime)
+  }
 }
 
 function setValueCurveAtTime(curve, startTime, duration){
-
-  var curveLength = curve.length
   var targets = this._targets
+  this._lastValue = curve[curve.length-1]
 
   for (var i=0,l=targets.length;i<l;i++){
-
-    var res = new Float32Array(curveLength)
-    for (var x=0;x<curveLength;x++){
-      res[x] = target.value(curve[x])
-    }
-
-    var target = targets[i]
-    target.param.setValueCurveAtTime(res, startTime, duration)
+    targets[i].setValueCurveAtTime(curve, startTime, duration)
   }
 }
 
 function cancelScheduledValues(startTime){
   var targets = this._targets
   for (var i=0,l=targets.length;i<l;i++){
-    var target = targets[i]
-    target.param.cancelScheduledValues(startTime)
-  }
-}
-
-function ramp(param, value, endTime, curveType){
-  var targets = param._targets
-  value = param.fence(value)
-
-  var startTime = param.context.currentTime
-  var duration = Math.max(0, endTime - startTime)
-  var curveLength = duration * param.context.sampleRate
-
-  var from = param.value
-  var to = param.fence(value)
-  var range = to - from
-
-  var curve = curves[curveType] || curves['linear']
-
-  //TODO: param.value should return the curve as it progresses
-  param._lastValue = to
-
-  for (var i=0,l=targets.length;i<l;i++){
-    var target = targets[i]
-    var curveValues = new Float32Array(curveLength)
-    var step = 1 / curveLength
-    for (var x=0;x<curveLength;x++){
-      var offset = curve(step * x) * range
-      var pos = from + offset
-      curveValues[x] = target.value(pos)
-    }
-    target.param.setValueCurveAtTime(curveValues, startTime, duration)
-  }
-}
-
-var curves = {
-  exp: function(value){
-    return value * value
-  },
-  linear: function(value){
-    return value
+    targets[i].cancelScheduledValues(startTime)
   }
 }

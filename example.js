@@ -1,39 +1,43 @@
 var createAudioNode = require('./index')
+var extendTransform = require('audio-param-transform')
 
 var audioContext = new webkitAudioContext()
 
 var filter = audioContext.createBiquadFilter()
 var gain = audioContext.createGain()
 
+extendTransform(filter.frequency, audioContext)
+extendTransform(gain.gain, audioContext)
+
 filter.connect(gain)
+
+var decimalFrequencyParam = filter.frequency.transform(valueToFreq)
+var gainBoostParam = gain.gain.transform(valueToGain)
 
 var customNode = createAudioNode(filter, gain, {
   amount: {
     min: 0, 
     max: 1, 
     defaultValue: 0.5,
-    targets: [
-      { param: filter.frequency, value: valueToFreq },
-      { param: gain.gain, value: valueToGain }
-    ]
+    targets: [ decimalFrequencyParam, gainBoostParam ]
   }
 })
 
-function valueToFreq(value){
+function valueToFreq(defaultValue, value){
   var min = Math.log(100)/Math.log(10)
     , max = Math.log(20000)/Math.log(10)
     , range = max-min
   return Math.pow(10, value * range + min)
 }
 
-function valueToGain(value){
+function valueToGain(defaultValue, value){
   var gain = (value) + 1
   return gain
 }
 
 var oscillator = audioContext.createOscillator()
 oscillator.type = 'sawtooth'
-oscillator.frequency.value = 200
+oscillator.frequency.value = 400
 oscillator.start(0)
 
 
