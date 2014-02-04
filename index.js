@@ -1,7 +1,7 @@
 var createAudioParam = require('./audio-param')
 
 module.exports = function(input, output, params){
-  var audioContext = input.context || output.context
+  var audioContext = (input || output).context
 
   var node = audioContext.createGain()
 
