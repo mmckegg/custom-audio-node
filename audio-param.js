@@ -1,10 +1,14 @@
 module.exports = function(audioContext, name, options){
   // options: provider, target(s)
 
+  options = options || {}
+
   var targets = options.targets
 
   if (!targets && options.target){
     targets = [options.target]
+  } else if (!targets){
+    targets = []
   }
 
   var param = Object.create(AudioParam.prototype, {
@@ -52,6 +56,8 @@ module.exports = function(audioContext, name, options){
   param.setTargetAtTime = setTargetAtTime
   param.setValueCurveAtTime = setValueCurveAtTime
   param.cancelScheduledValues = cancelScheduledValues
+  param.addTarget = addTarget
+  param.clearTargets = clearTargets
   param.context = audioContext
 
   // get value between min and max
@@ -134,5 +140,16 @@ function cancelScheduledValues(startTime){
   var targets = this._targets
   for (var i=0,l=targets.length;i<l;i++){
     targets[i].cancelScheduledValues(startTime)
+  }
+}
+
+function clearTargets(){
+  this._targets = []
+}
+
+function addTarget(target){
+  this._targets.push(target)
+  if (this._lastValue != null){
+    target.value = this._lastValue
   }
 }
