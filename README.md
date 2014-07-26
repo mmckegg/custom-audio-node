@@ -24,7 +24,7 @@ Specify the **input** and **output** nodes to wrap into a single audio node.
 ```js
 var extendTransform = require('audio-param-transform')
 
-var audioContext = new webkitAudioContext()
+var audioContext = new AudioContext()
 var input = audioContext.createBiquadFilter()
 var output = audioContext.createGain()
 

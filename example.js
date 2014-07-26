@@ -1,7 +1,7 @@
 var createAudioNode = require('./index')
 var extendTransform = require('audio-param-transform')
 
-var audioContext = new webkitAudioContext()
+var audioContext = new AudioContext()
 
 var filter = audioContext.createBiquadFilter()
 var gain = audioContext.createGain()
